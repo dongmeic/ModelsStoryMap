@@ -54,26 +54,33 @@ def spatialJoin(yrbuilt = 2021, by = 'yearly'):
                 os.remove(filePath)
     print("Processed spatial join for the new dev data by " + str(yrbuilt) + "...")
 
-def createHeatmap(yrbuilt = 2021, field = "nnsqft", by = "yearly"):
+def createHeatmap(yrbuilt = 2021, field = "nnsqft", by = "yearly", cellSize = 100, 
+                  reproject = False, changeFileNm = False):
     if by == "yearly":
         inFeature = os.path.join(path, 'output', 'newDevAnn' + str(yrbuilt) +'.shp')
     else:
         inFeature = os.path.join(path, 'output', 'newDevAnn' + str(yrbuilt) +'cum.shp')
     
     prjFileName = "newDevAnn" + str(yrbuilt) + "prj"
-    fileList = glob.glob(os.path.join(path, "output", prjFileName + ".*"))
-    if fileList != []:
-        for filePath in fileList:
-            if os.path.exists(filePath):
-                os.remove(filePath)
-    
     prjFeature = os.path.join(path, "output", prjFileName + ".shp")
-    arcpy.management.Project(inFeature, prjFeature, "PROJCS['WGS_1984_Web_Mercator_Auxiliary_Sphere',GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Mercator_Auxiliary_Sphere'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',0.0],PARAMETER['Standard_Parallel_1',0.0],PARAMETER['Auxiliary_Sphere_Type',0.0],UNIT['Meter',1.0]]", "NAD_1983_HARN_To_WGS_1984_2", "PROJCS['NAD83_HARN_Oregon_South_ft',GEOGCS['GCS_NAD83_HARN',DATUM['D_North_American_1983_HARN',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Lambert_Conformal_Conic'],PARAMETER['False_Easting',4921259.843],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-120.5],PARAMETER['Standard_Parallel_1',42.3333333333333],PARAMETER['Standard_Parallel_2',44.0],PARAMETER['Latitude_Of_Origin',41.6666666666667],UNIT['foot',0.3048]]", "NO_PRESERVE_SHAPE", None, "NO_VERTICAL")
+    if reproject:
+        
+        fileList = glob.glob(os.path.join(path, "output", prjFileName + ".*"))
+        if fileList != []:
+            for filePath in fileList:
+                if os.path.exists(filePath):
+                    os.remove(filePath)
+
+
+        arcpy.management.Project(inFeature, prjFeature, "PROJCS['WGS_1984_Web_Mercator_Auxiliary_Sphere',GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Mercator_Auxiliary_Sphere'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',0.0],PARAMETER['Standard_Parallel_1',0.0],PARAMETER['Auxiliary_Sphere_Type',0.0],UNIT['Meter',1.0]]", "NAD_1983_HARN_To_WGS_1984_2", "PROJCS['NAD83_HARN_Oregon_South_ft',GEOGCS['GCS_NAD83_HARN',DATUM['D_North_American_1983_HARN',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Lambert_Conformal_Conic'],PARAMETER['False_Easting',4921259.843],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-120.5],PARAMETER['Standard_Parallel_1',42.3333333333333],PARAMETER['Standard_Parallel_2',44.0],PARAMETER['Latitude_Of_Origin',41.6666666666667],UNIT['foot',0.3048]]", "NO_PRESERVE_SHAPE", None, "NO_VERTICAL")
     
     arcpy.FeatureToPoint_management(in_features=prjFeature, 
                                 out_feature_class="newDevCentroid", point_location="INSIDE")
-   
+    if changeFileNm:
+        outRaster = os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + "_" + str(cellSize) + ".tif")
+    else:
+        outRaster = os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + ".tif")
     with arcpy.EnvManager(mask=MPOBound):
             arcpy.gp.KernelDensity_sa("newDevCentroid", field, 
-                          os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + ".tif"),
-                          "100","", "SQUARE_KILOMETERS", "DENSITIES", "GEODESIC")
+                          outRaster,
+                          cellSize,"", "SQUARE_KILOMETERS", "DENSITIES", "GEODESIC")

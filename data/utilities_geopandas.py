@@ -42,8 +42,13 @@ def exportNewDevData(yrbuilt = 2021, by = 'yearly', step = 1):
             print("Exported cumulative data by " + str(yrbuilt) + "...")
 
 def plotRaster(yrbuilt = 2021, field = "nnsqft", fieldName = 'New Non-res SQFT', colormap = 'RdBu_r', 
-                export = True):
-    file = os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + ".tif")
+                cellSize = 100, export = True, changeFileNm = False):
+    
+    if changeFileNm:
+        file = os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + "_" + str(cellSize) + ".tif")
+    else:
+        file = os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + ".tif")
+    
     src = rasterio.open(file, mode="r+")
     fig, ax = plt.subplots(figsize=(28, 24))
     divider = make_axes_locatable(ax)
