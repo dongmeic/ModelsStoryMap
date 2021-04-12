@@ -29,17 +29,16 @@ class MidpointNormalize(mpl.colors.Normalize):
         x, y = [self.vmin, self.midpoint, self.vmax], [normalized_min, normalized_mid, normalized_max]
         return np.ma.masked_array(np.interp(value, x, y))
 
-def exportNewDevData(yrbuilt = 2021, by = 'yearly', step = 1):
-    newDev = gpd.read_file(os.path.join(path, 'new_developments.shp'))
-    for yrbuilt in range(2021, 2046, step):
-        if by == 'yearly':
-            newDevAnn = newDev[newDev['yrbuilt'] == yrbuilt]
-            newDevAnn.to_file(os.path.join(path, 'output', 'newDevAnn'+ str(yrbuilt) +'.shp'))
-            print("Exported yearly " + str(yrbuilt) + "...")
-        else:
-            newDevAnn = newDev[newDev['yrbuilt'] <= yrbuilt]
-            newDevAnn.to_file(os.path.join(path, 'output', 'newDevAnn'+ str(yrbuilt) +'cum.shp'))
-            print("Exported cumulative data by " + str(yrbuilt) + "...")
+def splitData(yrbuilt = 2021, by = 'cum', shpnm = 'parcel_data'):
+    shpdata = gpd.read_file(os.path.join(path, 'output', shpnm + '.shp'))
+    if by == 'yearly':
+        shpdata = shpdata[shpdata['yrbuilt'] == yrbuilt]
+        shpdata.to_file(os.path.join(path, 'output', shpnm + str(yrbuilt) +'.shp'))
+        print("Exported yearly " + str(yrbuilt) + "...")
+    else:
+        shpdata = shpdata[shpdata['yrbuilt'] <= yrbuilt]
+        shpdata.to_file(os.path.join(path, 'output', shpnm + str(yrbuilt) +'cum.shp'))
+        print("Exported cumulative data by " + str(yrbuilt) + "...")
 
 def plotRaster(yrbuilt = 2021, field = "nnsqft", fieldName = 'New Non-res SQFT', colormap = 'RdBu_r', 
                 cellSize = 100, export = True, changeFileNm = False):
