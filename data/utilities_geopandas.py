@@ -34,11 +34,11 @@ def splitData(yrbuilt = 2021, by = 'cum', shpnm = 'parcel_data'):
     if by == 'yearly':
         shpdata = shpdata[shpdata['yrbuilt'] == yrbuilt]
         shpdata.to_file(os.path.join(path, 'output', shpnm + str(yrbuilt) +'.shp'))
-        print("Exported yearly " + str(yrbuilt) + "...")
+        print("Exported yearly {0} in {1}...".format(shpnm, str(yrbuilt)))
     else:
         shpdata = shpdata[shpdata['yrbuilt'] <= yrbuilt]
         shpdata.to_file(os.path.join(path, 'output', shpnm + str(yrbuilt) +'cum.shp'))
-        print("Exported cumulative data by " + str(yrbuilt) + "...")
+        print("Exported cumulative {0} by {1}...".format(shpnm, str(yrbuilt)))
 
 def plotRaster(yrbuilt = 2021, field = "nnsqft", fieldName = 'New Non-res SQFT', colormap = 'RdBu_r', 
                 cellSize = 100, export = True, changeFileNm = False):
