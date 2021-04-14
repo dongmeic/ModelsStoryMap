@@ -48,7 +48,10 @@ def plotRaster(yrbuilt = 2021, field = "jobs", fieldName = 'Employment', colorma
         file = os.path.join(path, 'output', 
                             "KernelD_" + field + "_" + str(yrbuilt) + "_" + str(cellSize) + "_" + str(searchRadius) + ".tif")
     else:
-        file = os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + ".tif")
+        if yrbuilt == "":
+            file = os.path.join(path, 'output', "KernelD_" + field + ".tif")
+        else:
+            file = os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + ".tif")
     
     src = rasterio.open(file)
     fig, ax = plt.subplots(figsize=(28, 24))
@@ -77,7 +80,11 @@ def plotRaster(yrbuilt = 2021, field = "jobs", fieldName = 'Employment', colorma
     MPObd.plot(ax=ax, facecolor="none", edgecolor="black", linestyle='--')
     
     ctx.add_basemap(ax, source=ctx.providers.Stamen.TonerLite, alpha=0.3)
-    ax.set_title(fieldName + " Heatmap in Central Lane MPO (" + str(yrbuilt) + ")", fontsize=50, fontname="Palatino Linotype", 
+    if yrbuilt == "":
+        ax.set_title(fieldName + " Heatmap in Central Lane MPO in 2045", fontsize=50, fontname="Palatino Linotype", 
+                  color="grey", loc = 'center')
+    else:
+        ax.set_title(fieldName + " Heatmap in Central Lane MPO (" + str(yrbuilt) + ")", fontsize=50, fontname="Palatino Linotype", 
                   color="grey", loc = 'center')
     
     if data_ex.min() == 0:
@@ -97,8 +104,12 @@ def plotRaster(yrbuilt = 2021, field = "jobs", fieldName = 'Employment', colorma
 
     ax.axis("off");
     if export:
-        plt.savefig(os.path.join(outpath, "heatmap_" + field + "_" + str(yrbuilt) + ".png"), transparent=True, bbox_inches='tight')
-        print("Saved image for " + str(yrbuilt) + "...")
+        if yrbuilt == "":
+            plt.savefig(os.path.join(outpath, "heatmap_" + field + ".png"), transparent=True, bbox_inches='tight')
+            print("Saved image for " + field + "...")
+        else:
+            plt.savefig(os.path.join(outpath, "heatmap_" + field + "_" + str(yrbuilt) + ".png"), transparent=True, bbox_inches='tight')
+            print("Saved image for " + str(yrbuilt) + "...")
     src.close()
         
 

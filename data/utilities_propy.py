@@ -52,7 +52,10 @@ def createHeatmap(yrbuilt = 2021, shpnm = 'parcel_data', field = "jobs", by = "c
     if by == "yearly":
         inFeature = os.path.join(path, 'output', shpnm + str(yrbuilt) +'.shp')
     else:
-        inFeature = os.path.join(path, 'output', shpnm + str(yrbuilt) +'cum.shp')
+        if yrbuilt == "":
+            inFeature = os.path.join(path, 'output', shpnm +'.shp')
+        else:
+            inFeature = os.path.join(path, 'output', shpnm + str(yrbuilt) +'cum.shp')
     
     arcpy.FeatureToPoint_management(in_features=inFeature, 
                                 out_feature_class="dataCentroids", point_location="INSIDE")
@@ -60,8 +63,14 @@ def createHeatmap(yrbuilt = 2021, shpnm = 'parcel_data', field = "jobs", by = "c
         outRaster = os.path.join(path, 'output', 
                                  "KernelD_" + field + "_" + str(yrbuilt) + "_" + str(cellSize) + "_" + str(searchRadius) + ".tif")
     else:
-        outRaster = os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + ".tif")
+        if yrbuilt == "":
+            outRaster = os.path.join(path, 'output', "KernelD_" + field + ".tif")
+        else:
+            outRaster = os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + ".tif")
     with arcpy.EnvManager(mask=MPOBound):
             arcpy.gp.KernelDensity_sa("dataCentroids", field, outRaster, cellSize, searchRadius, 
                                       "SQUARE_KILOMETERS", "DENSITIES", "GEODESIC")
-    print("Created the heatmap for {0} in {1}".format(field, yrbuilt))
+    if yrbuilt == "":
+        print("Created the heatmap for {0}".format(field))
+    else:
+        print("Created the heatmap for {0} in {1}".format(field, yrbuilt))
