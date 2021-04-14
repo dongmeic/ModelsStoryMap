@@ -29,6 +29,10 @@ class MidpointNormalize(mpl.colors.Normalize):
         x, y = [self.vmin, self.midpoint, self.vmax], [normalized_min, normalized_mid, normalized_max]
         return np.ma.masked_array(np.interp(value, x, y))
 
+class ScalarFormatterForceFormat(ScalarFormatter):
+    def _set_format(self):  # Override function that finds format to use.
+        self.format = "%1.1f"  # Give format here
+    
 def splitData(yrbuilt = 2021, by = 'cum', shpnm = 'parcel_data'):
     shpdata = gpd.read_file(os.path.join(path, 'output', shpnm + '.shp'))
     shpdata = shpdata[shpdata['yrbuilt'] >= 2021]
@@ -96,7 +100,8 @@ def plotRaster(yrbuilt = 2021, field = "jobs", fieldName = 'Employment', colorma
                                  cmap=colormap, 
                                  norm=norm)
 
-    fmt = mpl.ticker.ScalarFormatter(useMathText=True)
+    #fmt = mpl.ticker.ScalarFormatter(useMathText=True)
+    fmt = ScalarFormatterForceFormat()
     fmt.set_powerlimits((0, 0))
     cbar = plt.colorbar(image_hidden, format=fmt, ax=ax, cax=cax, orientation="horizontal")
 
@@ -111,5 +116,3 @@ def plotRaster(yrbuilt = 2021, field = "jobs", fieldName = 'Employment', colorma
             plt.savefig(os.path.join(outpath, "heatmap_" + field + "_" + str(yrbuilt) + ".png"), transparent=True, bbox_inches='tight')
             print("Saved image for " + str(yrbuilt) + "...")
     src.close()
-        
-
