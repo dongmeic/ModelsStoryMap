@@ -40,15 +40,16 @@ def splitData(yrbuilt = 2021, by = 'cum', shpnm = 'parcel_data'):
         shpdata.to_file(os.path.join(path, 'output', shpnm + str(yrbuilt) +'cum.shp'))
         print("Exported cumulative {0} by {1}...".format(shpnm, str(yrbuilt)))
 
-def plotRaster(yrbuilt = 2021, field = "nnsqft", fieldName = 'New Non-res SQFT', colormap = 'RdBu_r', 
-                cellSize = 100, export = True, changeFileNm = False):
+def plotRaster(yrbuilt = 2021, field = "jobs", fieldName = 'Employment', colormap = 'RdBu_r', 
+                cellSize = 25, searchRadius = 1000, export = True, changeFileNm = False):
     
     if changeFileNm:
-        file = os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + "_" + str(cellSize) + ".tif")
+        file = os.path.join(path, 'output', 
+                            "KernelD_" + field + "_" + str(yrbuilt) + "_" + str(cellSize) + "_" + str(searchRadius) + ".tif")
     else:
         file = os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + ".tif")
     
-    src = rasterio.open(file, mode="r+")
+    src = rasterio.open(file)
     fig, ax = plt.subplots(figsize=(28, 24))
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("bottom", size="5%", pad="2%")
@@ -63,8 +64,8 @@ def plotRaster(yrbuilt = 2021, field = "nnsqft", fieldName = 'New Non-res SQFT',
     if data_ex.min() == 0: 
         image = show(ndata, 
                      transform=src.transform, 
-                     ax=ax, 
-                     cmap="Reds")
+                     ax=ax, #alpha=0.7,
+                     cmap=colormap)
     else:
         image = show(ndata, 
                      transform=src.transform, 
@@ -74,14 +75,14 @@ def plotRaster(yrbuilt = 2021, field = "nnsqft", fieldName = 'New Non-res SQFT',
         
     MPObd.plot(ax=ax, facecolor="none", edgecolor="black", linestyle='--')
     
-    ctx.add_basemap(ax, source=ctx.providers.Stamen.TonerLite, alpha=0.3)
+    ctx.add_basemap(ax, source=ctx.providers.Stamen.TonerLite, alpha=0.45)
     ax.set_title(fieldName + " Heatmap in Central Lane MPO (" + str(yrbuilt) + ")", fontsize=50, fontname="Palatino Linotype", 
                   color="grey", loc = 'center')
     
-    if yrbuilt in [2044, 2045] and field == "nnsqft":
+    if data_ex.min() == 0:
         # use imshow so that we have something to map the colorbar to
         image_hidden = ax.imshow(ndata, 
-                                 cmap="Reds")    
+                                 cmap=colormap)    
     else:
         image_hidden = ax.imshow(ndata, 
                                  cmap=colormap, 
