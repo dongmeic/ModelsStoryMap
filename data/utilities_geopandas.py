@@ -75,7 +75,7 @@ def plotRaster(yrbuilt = 2021, field = "jobs", fieldName = 'Employment', colorma
         
     MPObd.plot(ax=ax, facecolor="none", edgecolor="black", linestyle='--')
     
-    ctx.add_basemap(ax, source=ctx.providers.Stamen.TonerLite, alpha=0.45)
+    ctx.add_basemap(ax, source=ctx.providers.Stamen.TonerLite, alpha=0.3)
     ax.set_title(fieldName + " Heatmap in Central Lane MPO (" + str(yrbuilt) + ")", fontsize=50, fontname="Palatino Linotype", 
                   color="grey", loc = 'center')
     
