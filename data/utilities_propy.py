@@ -45,8 +45,8 @@ def spatialJoin(yrbuilt = 2021, shpnm = 'parcel_data', by = 'cum'):
                 os.remove(filePath)
     print("Processed spatial join for {0} by {1}...".format(shpnm, str(yrbuilt)))
 
-def createHeatmap(yrbuilt = 2021, field = "nnsqft", by = "yearly", cellSize = 100, 
-                  changeFileNm = False):
+def createHeatmap(yrbuilt = 2021, shpnm = 'parcel_data', field = "jobs", by = "cum", cellSize = 25, 
+                  searchRadius = 1000, changeFileNm = False):
     arcpy.env.extent = MPOBound
     mask = MPOBound
     if by == "yearly":
@@ -57,10 +57,11 @@ def createHeatmap(yrbuilt = 2021, field = "nnsqft", by = "yearly", cellSize = 10
     arcpy.FeatureToPoint_management(in_features=inFeature, 
                                 out_feature_class="dataCentroids", point_location="INSIDE")
     if changeFileNm:
-        outRaster = os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + "_" + str(cellSize) + ".tif")
+        outRaster = os.path.join(path, 'output', 
+                                 "KernelD_" + field + "_" + str(yrbuilt) + "_" + str(cellSize) + "_" + str(searchRadius) + ".tif")
     else:
         outRaster = os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + ".tif")
     with arcpy.EnvManager(mask=MPOBound):
-            arcpy.gp.KernelDensity_sa("newDevCentroid", field, 
-                          outRaster,
-                          cellSize,"", "SQUARE_KILOMETERS", "DENSITIES", "GEODESIC")
+            arcpy.gp.KernelDensity_sa("dataCentroids", field, outRaster, cellSize, searchRadius, 
+                                      "SQUARE_KILOMETERS", "DENSITIES", "GEODESIC")
+    print("Created the heatmap for {0} in {1}".format(field, yrbuilt))
