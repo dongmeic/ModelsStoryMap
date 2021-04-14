@@ -31,6 +31,7 @@ class MidpointNormalize(mpl.colors.Normalize):
 
 def splitData(yrbuilt = 2021, by = 'cum', shpnm = 'parcel_data'):
     shpdata = gpd.read_file(os.path.join(path, 'output', shpnm + '.shp'))
+    shpdata = shpdata[shpdata['yrbuilt'] >= 2021]
     if by == 'yearly':
         shpdata = shpdata[shpdata['yrbuilt'] == yrbuilt]
         shpdata.to_file(os.path.join(path, 'output', shpnm + str(yrbuilt) +'.shp'))
