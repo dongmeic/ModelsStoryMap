@@ -70,6 +70,9 @@ def createHeatmap(yrbuilt = 2021, shpnm = 'parcel_data', field = "jobs", by = "c
     with arcpy.EnvManager(mask=MPOBound):
             arcpy.gp.KernelDensity_sa("dataCentroids", field, outRaster, cellSize, searchRadius, 
                                       "SQUARE_KILOMETERS", "DENSITIES", "GEODESIC")
+    #output_raster = arcpy.sa.RasterCalculator('Int(outRaster)') 
+    #output_raster.save(outRaster)
+    
     if yrbuilt == "":
         print("Created the heatmap for {0}".format(field))
     else:
