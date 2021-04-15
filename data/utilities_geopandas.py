@@ -3,6 +3,7 @@ import contextily as ctx
 import geopandas as gpd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import pylab as plot
 import matplotlib.ticker as tick
 from matplotlib.ticker import ScalarFormatter
 import rasterio
@@ -137,6 +138,8 @@ def mapTAZdata(yrbuilt = 2021, field = 'jobs', scheme ='naturalbreaks', export =
     fig, ax = plt.subplots(figsize=(28, 24))
     TAZ.plot(ax=ax, facecolor="none", edgecolor="none", alpha=.3, linestyle='--')
     
+    params = {'legend.fontsize': 25, 'legend.handlelength': 2}
+    plot.rcParams.update(params)
     newDevTaz.plot(ax=ax, column=field, cmap=cmap, edgecolor='none',
                        scheme =scheme, alpha=.8,
                        legend=True, legend_kwds={"fmt": "{:.0f}"})

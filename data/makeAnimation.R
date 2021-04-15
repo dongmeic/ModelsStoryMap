@@ -1,9 +1,20 @@
 library(animation)
-library(magick)
+library(stringr)
 setwd("T:/Models/StoryMap/UrbanSim")
 
-#field <- "hh"
-im.convert(list.files(path = ".", pattern = "hh", full.names = T),
-           output=paste0("heatmap_", field, ".gif"))
+createAnimation <- function(field = "hh", TAZ=FALSE){
+  files = list.files(path = ".", pattern = field, full.names = T)
+  if(TAZ){
+    keyword = "new_"
+  }else{
+    keyword = "heatmap_"      
+  }
+  files = grep(keyword, files, value =TRUE) 
+  if(str_detect(files[1], "gif")){
+    im.convert(files[-1],output=paste0(keyword, field, ".gif"))
+  }else{
+    im.convert(files,output=paste0(keyword, field, ".gif"))
+  }
+}
 
-list.files(path = ".", pattern = "hh", full.names = T)[-1]
+createAnimation(field = "hh", TAZ=TRUE)
