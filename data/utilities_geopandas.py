@@ -14,6 +14,7 @@ import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 path = r'T:\Trans Projects\Model Development\UrbanSim_LandUse\Output\Simulation_47_Final_RTP'
+TAZ = gpd.read_file("V:/Data/Transportation/TAZ_Bound.shp")
 MPObd = gpd.read_file("V:/Data/Transportation/MPO_Bound.shp")
 outpath = r'T:\Models\StoryMap\UrbanSim'
 
@@ -88,8 +89,8 @@ def plotRaster(yrbuilt = 2021, field = "jobs", fieldName = 'Employment', colorma
         ax.set_title(fieldName + " Heatmap in Central Lane MPO in 2045", fontsize=50, fontname="Palatino Linotype", 
                   color="grey", loc = 'center')
     else:
-        ax.set_title(fieldName + " Heatmap in Central Lane MPO (" + str(yrbuilt) + ")", fontsize=50, fontname="Palatino Linotype", 
-                  color="grey", loc = 'center')
+        ax.set_title("Heatmap on New {0} in Central Lane MPO by {1}".format(fieldName, str(yrbuilt)), 
+                     fontsize=50, fontname="Palatino Linotype", color="grey", loc = 'center')
     
     if data_ex.min() == 0:
         # use imshow so that we have something to map the colorbar to
@@ -116,3 +117,37 @@ def plotRaster(yrbuilt = 2021, field = "jobs", fieldName = 'Employment', colorma
             plt.savefig(os.path.join(outpath, "heatmap_" + field + "_" + str(yrbuilt) + ".png"), transparent=True, bbox_inches='tight')
             print("Saved image for " + str(yrbuilt) + "...")
     src.close()
+    
+def mapTAZdata(yrbuilt = 2021, field = 'jobs', scheme ='naturalbreaks', export = True):
+    newDevTaz = gpd.read_file(os.path.join(path, "output", "parcel_data_taz_" + str(yrbuilt) + ".shp"))
+    
+    if field == 'jobs':
+        fieldName = 'Employment'
+    elif field == 'hh':
+        fieldName = 'Households'
+    else:
+        print("Need fieldName!")
+
+    min_val, max_val = 0.3,1.0
+    n = 10
+    orig_cmap = plt.cm.YlOrRd
+    colors = orig_cmap(np.linspace(min_val, max_val, n))
+    cmap = mpl.colors.LinearSegmentedColormap.from_list("mycmap", colors)
+        
+    fig, ax = plt.subplots(figsize=(28, 24))
+    TAZ.plot(ax=ax, facecolor="none", edgecolor="none", alpha=.3, linestyle='--')
+    
+    newDevTaz.plot(ax=ax, column=field, cmap=cmap, edgecolor='none',
+                       scheme =scheme, alpha=.8,
+                       legend=True, legend_kwds={"fmt": "{:.0f}"})
+
+    MPObd.plot(ax=ax, facecolor="none", edgecolor="black", linestyle='--')
+    ctx.add_basemap(ax, source=ctx.providers.Stamen.TonerLite)
+    plt.title("New {0} in Central Lane MPO by {1}".format(fieldName, str(yrbuilt)), fontsize=50, fontname="Palatino Linotype", 
+          color="grey", loc = 'center')
+    ax.ticklabel_format(style='sci')
+    ax.axis("off");
+
+    if export:
+        plt.savefig(os.path.join(outpath, "new_" + field + "_" + str(yrbuilt) + ".png"), transparent=True, bbox_inches='tight')
+        print("Saved image for " + str(yrbuilt) + "...")
