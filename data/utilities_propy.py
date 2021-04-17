@@ -18,12 +18,25 @@ def cleanFiles(path = path, name_pattern = "KernelD_", extension = "tif"):
         except:
             print("Error while deleting file : ", filePath)
     print("cleaned!")   
+
+def getCentroids(yrbuilt = 2021, shpnm = 'parcel_data', by = 'cum'):
+    if by == 'yearly':
+        inFeature = os.path.join(path, 'output', shpnm + str(yrbuilt) +'.shp')
+        outFeature = os.path.join(path, 'output', shpnm + str(yrbuilt) + "p" +'.shp')
+    else:
+        inFeature = os.path.join(path, 'output', shpnm + str(yrbuilt) + "cum" +'.shp')
+        outFeature = os.path.join(path, 'output', shpnm + str(yrbuilt) + "cump" +'.shp')    
     
+    arcpy.FeatureToPoint_management(in_features=inFeature, 
+                                out_feature_class=outFeature, point_location="INSIDE")
+    
+    print("Processed feature to point for {0} by {1}...".format(shpnm, str(yrbuilt)))
+
 def spatialJoin(yrbuilt = 2021, shpnm = 'parcel_data', by = 'cum'):
     if by == 'yearly':
-        joinFeatureNm = shpnm + str(yrbuilt)
+        joinFeatureNm = shpnm + str(yrbuilt) + "p"
     else:
-        joinFeatureNm = shpnm + str(yrbuilt) + "cum"
+        joinFeatureNm = shpnm + str(yrbuilt) + "cump"
         
     joinFeature = os.path.join(path, 'output', joinFeatureNm +'.shp')
     outFeatureNm = shpnm + "_taz_" + str(yrbuilt)
