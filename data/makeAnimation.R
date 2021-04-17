@@ -19,3 +19,6 @@ createAnimation <- function(field = "nhh", TAZ=FALSE){
 
 createAnimation(field = "njobs")
 createAnimation(field = "nhh")
+
+createAnimation(field = "njobs", TAZ=TRUE)
+createAnimation(field = "nhh", TAZ=TRUE)

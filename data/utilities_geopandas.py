@@ -139,7 +139,7 @@ def plotRaster(yrbuilt = 2021, field = "njobs", fieldName = 'Employment', colorm
         ax.set_title(fieldName + " Heatmap in Central Lane MPO in 2045", fontsize=50, fontname="Palatino Linotype", 
                   color="grey", loc = 'center')
     else:
-        ax.set_title("Heatmap on New {0} in Central Lane MPO by {1}".format(fieldName, str(yrbuilt)), 
+        ax.set_title("Growth in {0} in Central Lane MPO by {1}".format(fieldName, str(yrbuilt)), 
                      fontsize=50, fontname="Palatino Linotype", color="grey", loc = 'center')
     
     image_hidden = ax.imshow(ndata, 
@@ -190,7 +190,7 @@ def mapTAZdata(yrbuilt = 2021, field = 'njobs',  cmap = 'coolwarm', changeColor 
 
     MPObd.plot(ax=ax, facecolor="none", edgecolor="black", linestyle='--')
     ctx.add_basemap(ax, source=ctx.providers.Stamen.TonerLite)
-    plt.title("New {0} in Central Lane MPO by {1}".format(fieldName, str(yrbuilt)), fontsize=50, fontname="Palatino Linotype", 
+    plt.title("Growth in {0} in Central Lane MPO by {1}".format(fieldName, str(yrbuilt)), fontsize=50, fontname="Palatino Linotype", 
           color="grey", loc = 'center')
     ax.axis("off");
 
