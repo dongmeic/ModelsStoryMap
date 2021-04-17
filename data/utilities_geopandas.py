@@ -14,6 +14,8 @@ from rasterio.mask import mask
 import numpy as np
 import pandas as pd
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib import colors
+
 
 path = r'T:\Trans Projects\Model Development\UrbanSim_LandUse\Output\Simulation_47_Final_RTP'
 TAZ = gpd.read_file("V:/Data/Transportation/TAZ_Bound.shp")
@@ -32,6 +34,7 @@ bsqft_per_job = pd.read_csv('../../RTP/analysis/bsqft_per_job.csv')
 def compute_jobs(x, sqft, area):
     return sqft / area if x else None
 
+# apply the area_per_job function on the btype field
 def area_per_job(x):
     if x[1:-2] == '':
         area_per_job = None
@@ -64,22 +67,23 @@ def area_per_job(x):
                 isNonRes = True
     return(area_per_job, isNonRes)
 
-class MidpointNormalize(mpl.colors.Normalize):
-    def __init__(self, vmin, vmax, midpoint=0, clip=False):
-        self.midpoint = midpoint
-        mpl.colors.Normalize.__init__(self, vmin, vmax, clip)
-
-    def __call__(self, value, clip=None):
-        normalized_min = max(0, 1 / 2 * (1 - abs((self.midpoint - self.vmin) / (self.midpoint - self.vmax))))
-        normalized_max = min(1, 1 / 2 * (1 + abs((self.vmax - self.midpoint) / (self.midpoint - self.vmin))))
-        normalized_mid = 0.5
-        x, y = [self.vmin, self.midpoint, self.vmax], [normalized_min, normalized_mid, normalized_max]
-        return np.ma.masked_array(np.interp(value, x, y))
-
 class ScalarFormatterForceFormat(ScalarFormatter):
     def _set_format(self):  # Override function that finds format to use.
         self.format = "%1.1f"  # Give format here
-    
+
+def getMinMax(field = 'njobs'):
+    vmins = []
+    vmaxs = []
+    for yrbuilt in range(2021, 2046, 1):
+        file = os.path.join(path, 'output', "KernelD_" + field + "_" + str(yrbuilt) + ".tif")
+        src = rasterio.open(file)
+        data = src.read(1)
+        data_ex = data[data != data.min()]
+        vmins.append(data_ex.min())
+        vmaxs.append(data.max())
+        src.close()
+    return min(vmins), max(vmaxs)
+        
 def splitData(yrbuilt = 2021, by = 'cum', shpnm = 'parcel_data'):
     shpdata = gpd.read_file(os.path.join(path, 'output', shpnm + '.shp'))
     shpdata = shpdata[shpdata['yrbuilt'] >= 2021]
@@ -92,7 +96,7 @@ def splitData(yrbuilt = 2021, by = 'cum', shpnm = 'parcel_data'):
         shpdata.to_file(os.path.join(path, 'output', shpnm + str(yrbuilt) +'cum.shp'))
         print("Exported cumulative {0} by {1}...".format(shpnm, str(yrbuilt)))
 
-def plotRaster(yrbuilt = 2021, field = "jobs", fieldName = 'Employment', colormap = 'RdBu_r', 
+def plotRaster(yrbuilt = 2021, field = "njobs", fieldName = 'Employment', colormap = 'RdYlBu_r', 
                 cellSize = 25, searchRadius = 1000, export = True, changeFileNm = False):
     
     if changeFileNm:
@@ -114,7 +118,7 @@ def plotRaster(yrbuilt = 2021, field = "jobs", fieldName = 'Employment', colorma
     ndata = np.where(data == data.min(), np.nan, data)
 
     data_ex = data[data != data.min()]
-    norm = MidpointNormalize(vmin = data_ex.min(), vmax = data.max(), midpoint=0)
+    norm = colors.TwoSlopeNorm(vmin=getMinMax(field)[0], vcenter=0, vmax=getMinMax(field)[1])
     
     if data_ex.min() == 0: 
         image = show(ndata, 
@@ -147,14 +151,12 @@ def plotRaster(yrbuilt = 2021, field = "jobs", fieldName = 'Employment', colorma
                                  cmap=colormap, 
                                  norm=norm)
 
-    #fmt = mpl.ticker.ScalarFormatter(useMathText=True)
-    fmt = ScalarFormatterForceFormat()
+    fmt = mpl.ticker.ScalarFormatter(useMathText=True)
+    #fmt = ScalarFormatterForceFormat()
     fmt.set_powerlimits((0, 0))
     cbar = plt.colorbar(image_hidden, format=fmt, ax=ax, cax=cax, orientation="horizontal")
-
-    mpl.rcParams.update({'font.size': 20})
-
     ax.axis("off");
+    
     if export:
         if yrbuilt == "":
             plt.savefig(os.path.join(outpath, "heatmap_" + field + ".png"), transparent=True, bbox_inches='tight')
