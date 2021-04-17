@@ -2,7 +2,7 @@ library(animation)
 library(stringr)
 setwd("T:/Models/StoryMap/UrbanSim")
 
-createAnimation <- function(field = "hh", TAZ=FALSE){
+createAnimation <- function(field = "nhh", TAZ=FALSE){
   files = list.files(path = ".", pattern = field, full.names = T)
   if(TAZ){
     keyword = "new_"
@@ -17,4 +17,5 @@ createAnimation <- function(field = "hh", TAZ=FALSE){
   }
 }
 
-createAnimation(field = "hh", TAZ=TRUE)
+createAnimation(field = "njobs")
+createAnimation(field = "nhh")

@@ -14,8 +14,6 @@ from rasterio.mask import mask
 import numpy as np
 import pandas as pd
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from matplotlib import colors
-
 
 path = r'T:\Trans Projects\Model Development\UrbanSim_LandUse\Output\Simulation_47_Final_RTP'
 TAZ = gpd.read_file("V:/Data/Transportation/TAZ_Bound.shp")
@@ -82,7 +80,16 @@ def getMinMax(field = 'njobs'):
         vmaxs.append(data.max())
         src.close()
     return min(vmins), max(vmaxs)
-        
+
+def getMinMax_TAZ(field = 'njobs'):
+    vmins = []
+    vmaxs = []
+    for yrbuilt in range(2021, 2046, 1):
+        file = gpd.read_file(os.path.join(path, "output", "parcel_data_taz_" + str(yrbuilt) + ".shp"))
+        vmins.append(file[field].min())
+        vmaxs.append(file[field].max())
+    return min(vmins), max(vmaxs)
+
 def splitData(yrbuilt = 2021, by = 'cum', shpnm = 'parcel_data'):
     shpdata = gpd.read_file(os.path.join(path, 'output', shpnm + '.shp'))
     shpdata = shpdata[shpdata['yrbuilt'] >= 2021]
@@ -117,20 +124,14 @@ def plotRaster(yrbuilt = 2021, field = "njobs", fieldName = 'Employment', colorm
     ndata = np.where(data == data.min(), np.nan, data)
 
     data_ex = data[data != data.min()]
-    norm = colors.TwoSlopeNorm(vmin=getMinMax(field)[0], vcenter=0, vmax=getMinMax(field)[1])
-    
-    if data_ex.min() == 0: 
-        image = show(ndata, 
-                     transform=src.transform, 
-                     ax=ax, #alpha=0.7,
-                     cmap=colormap)
-    else:
-        image = show(ndata, 
-                     transform=src.transform, 
-                     ax=ax, 
-                     cmap=colormap, 
-                     norm=norm)
-        
+    norm = mpl.colors.TwoSlopeNorm(vmin=getMinMax(field)[0], vcenter=0, vmax=getMinMax(field)[1])
+
+    image = show(ndata, 
+                 transform=src.transform, 
+                 ax=ax, 
+                 cmap=colormap, 
+                 norm=norm)
+
     MPObd.plot(ax=ax, facecolor="none", edgecolor="black", linestyle='--')
     
     ctx.add_basemap(ax, source=ctx.providers.Stamen.TonerLite, alpha=0.3)
@@ -141,14 +142,9 @@ def plotRaster(yrbuilt = 2021, field = "njobs", fieldName = 'Employment', colorm
         ax.set_title("Heatmap on New {0} in Central Lane MPO by {1}".format(fieldName, str(yrbuilt)), 
                      fontsize=50, fontname="Palatino Linotype", color="grey", loc = 'center')
     
-    if data_ex.min() == 0:
-        # use imshow so that we have something to map the colorbar to
-        image_hidden = ax.imshow(ndata, 
-                                 cmap=colormap)    
-    else:
-        image_hidden = ax.imshow(ndata, 
-                                 cmap=colormap, 
-                                 norm=norm)
+    image_hidden = ax.imshow(ndata, 
+                             cmap=colormap, 
+                             norm=norm)
 
     fmt = mpl.ticker.ScalarFormatter(useMathText=True)
     #fmt = ScalarFormatterForceFormat()
@@ -162,11 +158,13 @@ def plotRaster(yrbuilt = 2021, field = "njobs", fieldName = 'Employment', colorm
             print("Saved image for " + field + "...")
         else:
             plt.savefig(os.path.join(outpath, "heatmap_" + field + "_" + str(yrbuilt) + ".png"), transparent=True, bbox_inches='tight')
-            print("Saved image for " + str(yrbuilt) + "...")
+            print("Saved image for {0} in {1}...".format(field, str(yrbuilt)))
     src.close()
     
-def mapTAZdata(yrbuilt = 2021, field = 'njobs', scheme ='naturalbreaks', export = True):
+def mapTAZdata(yrbuilt = 2021, field = 'njobs',  cmap = 'coolwarm', changeColor = False, export = True):
+        
     newDevTaz = gpd.read_file(os.path.join(path, "output", "parcel_data_taz_" + str(yrbuilt) + ".shp"))
+    norm = mpl.colors.TwoSlopeNorm(vmin=getMinMax_TAZ(field)[0], vcenter=0, vmax=getMinMax_TAZ(field)[1])
     
     if field == 'njobs':
         fieldName = 'Employment'
@@ -174,29 +172,28 @@ def mapTAZdata(yrbuilt = 2021, field = 'njobs', scheme ='naturalbreaks', export 
         fieldName = 'Households'
     else:
         print("Need fieldName!")
-
-    min_val, max_val = 0.3,1.0
-    n = 10
-    orig_cmap = plt.cm.YlOrRd
-    colors = orig_cmap(np.linspace(min_val, max_val, n))
-    cmap = mpl.colors.LinearSegmentedColormap.from_list("mycmap", colors)
+    
+    if changeColor:       
+        min_val, max_val = 0.3,1.0
+        n = 10
+        orig_cmap = plt.cm.YlOrRd
+        colors = orig_cmap(np.linspace(min_val, max_val, n))
+        cmap = mpl.colors.LinearSegmentedColormap.from_list("mycmap", colors)
         
     fig, ax = plt.subplots(figsize=(28, 24))
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("top", size="3%", pad="2%")
+
     TAZ.plot(ax=ax, facecolor="none", edgecolor="none", alpha=.3, linestyle='--')
-    
-    params = {'legend.fontsize': 25, 'legend.handlelength': 2}
-    plot.rcParams.update(params)
-    newDevTaz.plot(ax=ax, column=field, cmap=cmap, edgecolor='none',
-                       scheme =scheme, alpha=.8,
-                       legend=True, legend_kwds={"fmt": "{:.0f}"})
+    newDevTaz.plot(ax=ax, column=field, cmap=cmap, norm=norm, edgecolor='none', alpha=.8,
+                    cax=cax, legend=True, legend_kwds={'orientation': "horizontal"})
 
     MPObd.plot(ax=ax, facecolor="none", edgecolor="black", linestyle='--')
     ctx.add_basemap(ax, source=ctx.providers.Stamen.TonerLite)
     plt.title("New {0} in Central Lane MPO by {1}".format(fieldName, str(yrbuilt)), fontsize=50, fontname="Palatino Linotype", 
           color="grey", loc = 'center')
-    ax.ticklabel_format(style='sci')
     ax.axis("off");
 
     if export:
         plt.savefig(os.path.join(outpath, "new_" + field + "_" + str(yrbuilt) + ".png"), transparent=True, bbox_inches='tight')
-        print("Saved image for " + str(yrbuilt) + "...")
+        print("Saved image for {0} in {1}...".format(field, str(yrbuilt)))
