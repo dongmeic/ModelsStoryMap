@@ -22,7 +22,6 @@ TAZ = gpd.read_file("V:/Data/Transportation/TAZ_Bound.shp")
 MPObd = gpd.read_file("V:/Data/Transportation/MPO_Bound.shp")
 outpath = r'T:\Models\StoryMap\UrbanSim'
 
-
 df = pd.read_csv('../../RTP/analysis/building_types.csv')
 # get non-residential building types
 btypes = df[df['is_non_residential']]['building_type_id'].unique()
@@ -96,7 +95,7 @@ def splitData(yrbuilt = 2021, by = 'cum', shpnm = 'parcel_data'):
         shpdata.to_file(os.path.join(path, 'output', shpnm + str(yrbuilt) +'cum.shp'))
         print("Exported cumulative {0} by {1}...".format(shpnm, str(yrbuilt)))
 
-def plotRaster(yrbuilt = 2021, field = "njobs", fieldName = 'Employment', colormap = 'RdYlBu_r', 
+def plotRaster(yrbuilt = 2021, field = "njobs", fieldName = 'Employment', colormap = 'coolwarm', 
                 cellSize = 25, searchRadius = 1000, export = True, changeFileNm = False):
     
     if changeFileNm:
@@ -166,12 +165,12 @@ def plotRaster(yrbuilt = 2021, field = "njobs", fieldName = 'Employment', colorm
             print("Saved image for " + str(yrbuilt) + "...")
     src.close()
     
-def mapTAZdata(yrbuilt = 2021, field = 'jobs', scheme ='naturalbreaks', export = True):
+def mapTAZdata(yrbuilt = 2021, field = 'njobs', scheme ='naturalbreaks', export = True):
     newDevTaz = gpd.read_file(os.path.join(path, "output", "parcel_data_taz_" + str(yrbuilt) + ".shp"))
     
-    if field == 'jobs':
+    if field == 'njobs':
         fieldName = 'Employment'
-    elif field == 'hh':
+    elif field == 'nhh':
         fieldName = 'Households'
     else:
         print("Need fieldName!")
