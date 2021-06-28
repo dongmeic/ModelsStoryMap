@@ -35,16 +35,21 @@ def compute_jobs(x, sqft, area):
 
 # apply the area_per_job function on the btype field
 def area_per_job(x):
+# when btype is (), doesn't apply for jobs and considered as residential
     if x[1:-2] == '':
         area_per_job = None
         isNonRes = False
     else:
+        # when only one value in btype
         if len(x[1:-2].split(', ')) == 1:
             a = x[1:-2].split(', ')
+            # if the value is in non-residential building type
             if int(a[0]) in btypes:            
                 area_per_job = bsqft_per_job.loc[bsqft_per_job.building_type_id == int(a[0]), 'area_per_job'].values[0]
                 isNonRes = True
+            # if the value is in residential building type
             elif int(a[0]) in res_btypes:
+                # if the residential building type is included in bsqft_per_job
                 if int(a[0]) in bsqft_per_job.building_type_id:
                     area_per_job = bsqft_per_job.loc[bsqft_per_job.building_type_id == int(a[0]), 'area_per_job'].values[0]
                 else:
@@ -53,15 +58,19 @@ def area_per_job(x):
             else:
                 area_per_job = None
                 isNonRes = False
+        # when there is more than one value in btype
         else:
             a = x[1:-1].split(', ')
             b = [int(btype) for btype in a]
+            # separate the building types to non-residential and residential types
             btypeList = [btype for btype in b if btype in btypes]
             res_btypeList = [btype for btype in b if btype in res_btypes]
             if btypeList == []:
+                # if there is not non-residential types, use mean value of area_per_job for the residential types
                 area_per_job = bsqft_per_job.loc[bsqft_per_job.building_type_id.isin(res_btypeList), 'area_per_job'].mean()
                 isNonRes = False
             else:
+                # if there is non-residential types, use mean value of area_per_job for the non-residential types
                 area_per_job = bsqft_per_job.loc[bsqft_per_job.building_type_id.isin(btypeList), 'area_per_job'].mean()
                 isNonRes = True
     return(area_per_job, isNonRes)
