@@ -20,12 +20,14 @@ TAZ = gpd.read_file("V:/Data/Transportation/TAZ_Bound.shp")
 MPObd = gpd.read_file("V:/Data/Transportation/MPO_Bound.shp")
 outpath = r'T:\Models\StoryMap\UrbanSim'
 
+#https://github.com/dongmeic/RTP/blob/main/analysis/building_types.csv
 df = pd.read_csv('../../RTP/analysis/building_types.csv')
 # get non-residential building types
 btypes = df[df['is_non_residential']]['building_type_id'].unique()
 # get residential building tpyes
 ndf = df[df['is_residential']]
 res_btypes = ndf[~ndf['is_non_residential']]['building_type_id'].unique()
+#https://github.com/dongmeic/RTP/blob/main/analysis/bsqft_per_job.csv
 bsqft_per_job = pd.read_csv('../../RTP/analysis/bsqft_per_job.csv')
 
 def compute_jobs(x, sqft, area):
