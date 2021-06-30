@@ -54,4 +54,10 @@ The calculation of jobs is only applied on the non-residential building types an
 
 8. Map heatmaps and create animations;
 
-9. Map TAZ data and create animations.
+9. Map TAZ data and create animations;
+
+10. Review new developments.
+
+# Review notes on new developments
+
+The review focuses on the outliers of employment and residential growth as the numbers of new jobs and households, particularly on negative growth. The datasets for the review include 1) employment growth as number of jobs (njobs), 2) residential growth as number of households (nhh), 3) employment growth as non-residential square footage (nnrsqft),4) non-residential square footage (nrsqft), 5) non-residential square footage (nrsqft), 6) residential units (du), and 7) residential units of demolished building(s) (odu). These datasets can be examined at the parcel level [here](https://public.tableau.com/views/Reviewnewdevelopments/Review?:language=en-US&:display_count=n&:origin=viz_share_link). Unusual negative employment growth is shown in 2022 at the University of Oregon and between Echo Hollow Rd and Barger Dr. The highest employment growth occurs in 2038 near Highway 99, in 2042 between Van Duyn Rd and I-5, and in 2045 near Clear Lake Rd.
