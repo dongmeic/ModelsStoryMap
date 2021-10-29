@@ -36,7 +36,7 @@ Two variables new dus (residential growth) and new non-res square feet (employme
 
 new du = du - odu ---> **ndu**
 
-new nrsqft = nsqft - onrsqft ---> **nnrsqft**
+new nrsqft = nrsqft - onrsqft ---> **nnrsqft**
 
 The calculation of jobs is only applied on the non-residential building types and square footage of parcel. 
 
